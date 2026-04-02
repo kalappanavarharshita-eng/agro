@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agro Products</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      color: #2e7d32;
+    }
+
+    #categories, #products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-align: center;
+      width: 150px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .category-card {
+      background-color: #a5d6a7;
+      color: #1b5e20;
+      font-weight: bold;
+    }
+
+    .product-card {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Categories</h1>
+  <div id="categories"></div>
+
+  <h1>Products</h1>
+  <div id="products"></div>
+
+  <script>
+    const categoriesDiv = document.getElementById("categories");
+    const productsDiv = document.getElementById("products");
+
+    // Fetch categories
+    fetch("http://localhost:5000/api/categories")
+      .then(res => res.json())
+      .then(categories => {
+        categories.forEach(cat => {
+          const btn = document.createElement("div");
+          btn.className = "card category-card";
+          btn.innerHTML = `<img src="${cat.image}" alt="${cat.name}"><span>${cat.name}</span>`;
+          btn.onclick = () => fetchProducts(cat.id);
+          categoriesDiv.appendChild(btn);
+        });
+      })
+      .catch(err => console.error("Categories fetch error:", err));
+
+    // Fetch products by category
+    function fetchProducts(categoryId) {
+      productsDiv.innerHTML = "Loading products...";
+      fetch(`http://localhost:5000/api/products/${categoryId}`)
+        .then(res => res.json())
+        .then(products => {
+          productsDiv.innerHTML = "";
+          if (products.length === 0) {
+            productsDiv.textContent = "No products found for this category.";
+          } else {
+            products.forEach(p => {
+              const pTag = document.createElement("div");
+              pTag.className = "card product-card";
+              pTag.innerHTML = `<img src="${p.image}" alt="${p.name}"><span>${p.name}</span>`;
+              productsDiv.appendChild(pTag);
+            });
+          }
+        })
+        .catch(err => console.error("Products fetch error:", err));
+    }
+  </script>
+</body>
+</html>
